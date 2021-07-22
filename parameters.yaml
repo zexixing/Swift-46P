@@ -1,0 +1,29 @@
+Comet:
+    GeocentricDistance: 0.189
+    HeliocentricDistance: 1.136
+    ProductionRates:
+        - 1.e+28
+    TimeAtProductions: # in days ago
+        - 50
+
+ParentSpecies:
+    Velocity: 0.85 # km/s
+    TotalLifetime: 86430 # s
+    DissociativeLifetime: 101730 # s
+    DestructionLevel: 0.99 # fraction
+    Sigma: 3.0e-16 # cm^2, approximate cross section for most molecules we care about
+
+FragmentSpecies:
+    Name: "OH"
+    Velocity: 1.05 # km/s
+    TotalLifetime: 129000 # s
+    DestructionLevel: 0.95 # fraction
+
+Grid:
+    NumRadialGridpoints: 50
+    NumAngularGridpoints: 30
+    SubgridRadialSteps: 12  # can probably leave this alone
+    SubgridAngularSteps: 7  # this one too
+
+Misc:
+    PrintDensityProgress: True
