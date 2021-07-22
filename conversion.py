@@ -216,7 +216,7 @@ def num2q_fit(aper_list, num_list, num_err_list, wvm_name,
         # get assumed num of the model within the aperture
         dis_model, col_den_model = num_assu(wvm_name, aperture, start=start, profile=True)
         # readin the assumed Q_H2O
-        wvm_path = get_path('../docs/wvm/'+wvm_name)
+        wvm_path = get_path('../docs/'+wvm_name)
         wvm_file = open(wvm_path)
         wvm_file_lines = wvm_file.readlines()
         wvm_file.close()
