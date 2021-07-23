@@ -276,13 +276,13 @@ def sur_bri_profile(scale, epoch, red,
                             'mean', mask_img,
                             relative_path=relative_path)[0] #~~TODO:
         #bg_uvv = 0.0038431776735597814*0.5
-        #bg_uvv =  0.0048569324053546305*0.25*2
+        bg_uvv =  0.0048569324053546305*0.25
         #bg_uw1 = 0.000979366426149368*0.4
-        #bg_uw1 = 0.0013638746855089488*0.15*2
+        bg_uw1 = 0.0013638746855089488*0.15
         #bg_uvv = 0.
         #bg_uw1 = 0.
-        bg_uvv = 0.006277 - 0.002923481399193406
-        bg_uw1 = 0.000532 + 0.0002636321005411446
+        #bg_uvv = 0.006277 - 0.002923481399193406
+        #bg_uw1 = 0.000532 + 0.0002636321005411446
         beta = 0.09276191501510327
         beta = reddening_correct(red)*beta
         bg_bri = bg_uw1 - beta*bg_uvv # extrapolated bkg

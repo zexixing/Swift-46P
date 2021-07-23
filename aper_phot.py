@@ -454,7 +454,7 @@ def aper_phot(img_name, filt,
     else:
         exposure = 1.
     if filt == 'v':
-        #bg_bri = 0.0048569324053546305*0.25*exposure*2
+        bg_bri = 0.0048569324053546305*0.25*exposure
         bg_bri_err = bg_bri
     #print('bg_bri:'+str(bg_bri))
     # photometry

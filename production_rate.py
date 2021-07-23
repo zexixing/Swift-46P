@@ -138,10 +138,10 @@ def aperPhot():
                                           cr_uw1, cr_uw1_err,
                                           cr_v, cr_v_err, red)
 
-    flux_v, flux_v_err = flux_ref_v(spec_name_sun, 
-                                    spec_name_OH, 
-                                    cr_uw1, cr_uw1_err, 
-                                    cr_v, cr_v_err, red)
+    #flux_v, flux_v_err = flux_ref_v(spec_name_sun, 
+    #                                spec_name_OH, 
+    #                                cr_uw1, cr_uw1_err, 
+    #                                cr_v, cr_v_err, red)
     
     result_v = aper_phot(img_name_v, 'v', 
                          src_center, src_r_v,
@@ -193,7 +193,7 @@ def img2q(img_name):
                                                               start, step, mask_img,
                                                               relative_path='sub/',
                                                               refcorr=refcorr,img_name=img_name,
-                                                              star_clip=True)[:4]
+                                                              star_clip=star_clip)[:4]
     #aper_list = au2km(as2au(aper_list*scale, delta))
     # total counts
     # unit conversion
@@ -217,13 +217,13 @@ def img2q(img_name):
     print('OH flux:',flux_total,flux_total_err)
     num_total_err = np.sum(num_err*2*np.pi*aper_list_km*1e5*dr)
     # read wvm and interpolate & fitting
-    q, q_err, dis2col, ratio = num2q_fit(aper_list_km, num, num_err, wvm_name, 
-                                        aperture=src_r_uw1, if_show = True, start=start,delta=delta,rh=rh) #--TODO: check
+    #q, q_err, dis2col, ratio = num2q_fit(aper_list_km, num, num_err, wvm_name, 
+    #                                    aperture=src_r_uw1, if_show = True, start=start,delta=delta,rh=rh) #--TODO: check
     #q, q_err, dis2col, ratio = num2q_fit(aper_list_km[:-100], num[:-100], num_err[:-100], wvm_name,
     #                                     aperture=1.5*aper_list_pix[-100]-0.5*aper_list_pix[-101],
     #                                     if_show = False, start=start)#1.5*aper_list_pix[150]-0.5*aper_list_pix[151])
-    #q, q_err, dis2col, ratio = num2q(num_total, num_total_err, wvm_name, scale, delta=delta, aperture=src_r_uw1,#1.5*aper_list_pix[-100]-0.5*aper_list_pix[-101], 
-    #                                 if_show = False, start=start)
+    q, q_err, dis2col, ratio = num2q(num_total, num_total_err, wvm_name, scale, delta=delta, aperture=src_r_uw1,#1.5*aper_list_pix[-100]-0.5*aper_list_pix[-101], 
+                                     if_show = False, start=start)
     # active area
     active_area = q/z
     active_area_err = q_err/z
@@ -353,7 +353,7 @@ def howRed(red_list=np.linspace(0,25,26),chatter=1, if_default=False):
 # define global parameters
 print('###################################')
 #obs_log_name = '25'+'_obs-log_46P.txt'
-epoch = '12'#'26'
+epoch = 'jan'#'26'
 obs_log_name = epoch+'_obs-log_46P.txt'
 horizon_id = 90000548#90000546
 obs_table = obtainObs(obs_log_name, horizon_id, epoch)
@@ -374,7 +374,7 @@ wvm_name = 'wvm/'+epoch+'_wvm.txt' #'pyvm'
 wvm_c2_name = 'wvm/'+epoch+'_wvm_c2.txt'
 phase_name = 'phase_correction.txt'
 ext={0:'img',1:'exp'}
-src_r_uw1 = obtainRadius(30000, delta, scale)
+src_r_uw1 = obtainRadius(70000, delta, scale)
 #src_r_uw1 = obtainRadius(30000, delta, scale)
 src_r_v = obtainRadius(10000, delta, scale)
 z = 3.233E+17#3.106E+17#6.278E+16--TODO:
@@ -387,12 +387,13 @@ else:
 coicorr=False
 c2corr=False
 sencorr=False
+star_clip=False
 mask_img, src_method = howMask(ifmask)
 if scale == 1.004:
     start = 6
     step = 2
 elif scale == 0.502:
-    start = 10
+    start = 50
     step = 5
     #src_r_uw1 = 1070
 print('start: '+str(start)+';  step: '+str(step))
@@ -406,9 +407,9 @@ phot_dict = aperPhot()
 
 ext={0:'img',1:'err2',2:'exp'}
 #red, if_fit = howRed(chatter=1)
-img_name = epoch+'_sub_red'+str(int(red))+'_new.fits'
+img_name = epoch+'_sub_red'+str(int(red))+'.fits'
 #err2_name = epoch+'_sub_red'+str(int(red))+'_err.fits'
-refcorr=False
+refcorr=True
 
 fits_sub(img_name_uw1, img_name_v, epoch, red, rh, delta, scale, 
          'stack/',wvm_name=wvm_c2_name,exp=True,smooth=smooth,coicorr=coicorr,c2corr=c2corr)
