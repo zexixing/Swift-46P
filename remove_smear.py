@@ -192,7 +192,7 @@ def stack(evt_ind, filt, id_horizons, size):
         stacked_exp += slice_exp
     #stacked_exp = stacked_exp/np.max(stacked_exp)
     #stacked_exp = np.where((stacked_exp>0)*(stacked_exp<1),0.5,stacked_exp)
-    output_name = evt_ind+'_'+filt+'.fits.gz'#'_'+str(int(num))+'.fits.gz'
+    output_name = evt_ind+'_'+filt+'_new.fits.gz'#'_'+str(int(num))+'.fits.gz'
     output_path = get_path('../docs/smear/'+output_name)
     hdr = fits.Header()
     dt = Time(hd['DATE-OBS']) - Time(hd['DATE-END'])
@@ -226,6 +226,7 @@ def gaussBlur(img, sigma, H, W, _boundary='fill', _fillvalue=0):
                                      boundary=_boundary, fillvalue=_fillvalue)
     return gaussBlur_xy
 
+#stack('00094421002', 'uvv', 90000548, 2000)
 '''
 import math
 #obs = {'00094421002':'uvv',

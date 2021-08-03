@@ -10,6 +10,7 @@ import math
 def fits_sub(img_uw1_name, img_uvv_name, ind, r, rh, delta, scale, 
              relative_path='', wvm_name = False,
              exp=False, smooth=False, coicorr=True, c2corr=True):
+    print(img_uw1_name, img_uvv_name, ind, r, rh, delta, scale, wvm_name, exp, smooth, coicorr, c2corr)
     img_uw1_data = load_img(img_uw1_name,relative_path,ext=0)
     img_uvv_data = load_img(img_uvv_name,relative_path,ext=0)
     img_uw1_header = load_header(img_uw1_name,relative_path)

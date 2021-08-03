@@ -353,7 +353,7 @@ def howRed(red_list=np.linspace(0,25,26),chatter=1, if_default=False):
 # define global parameters
 print('###################################')
 #obs_log_name = '25'+'_obs-log_46P.txt'
-epoch = 'jan'#'26'
+epoch = 'nov'#'26'
 obs_log_name = epoch+'_obs-log_46P.txt'
 horizon_id = 90000548#90000546
 obs_table = obtainObs(obs_log_name, horizon_id, epoch)

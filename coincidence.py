@@ -122,7 +122,7 @@ def stack_slice_part():
     hdu_img = fits.PrimaryHDU(stacked_img,header=hdr)
     hdu_exp = fits.ImageHDU(stacked_exp)
     hdul = fits.HDUList([hdu_img,hdu_exp])
-    output_path = get_path('../docs/evt_slice/12_uw1_stack.fits.gz')
+    output_path = get_path('../docs/evt_slice/12_uw1_stack_img.fits.gz')
     hdul.writeto(output_path)
     os.system('mv '+output_path+' '+output_path[:-3])
 
@@ -161,8 +161,8 @@ def read_extension(epoch,obsid,ext):
     else:
         data_path = get_path(obs_path+'image/sw'+obsid+filt+'_sk.img.gz')
         ext_series['data'] = fits.open(data_path)[ext].data
-        ext_path = get_path(obs_path+'image/sw'+obsid+filt+'_ex.img.gz')
-        ext_series['data_exp'] = fits.open(ext_path)[1].data
+        exp_path = get_path(obs_path+'image/sw'+obsid+filt+'_ex.img.gz')
+        ext_series['data_exp'] = fits.open(exp_path)[1].data
         ext_series['type'] = 'image'
         if evt_path.exists():
             ext_series['scale'] = 0.502
@@ -172,11 +172,12 @@ def read_extension(epoch,obsid,ext):
 
 #read_extension('12','00094422001',1)
 
-# stack with coiz ncidenceCorr
+# stack with coincidenceCorr
 # ~TODO: img created by event: there is only 0 or 1 in a single 
 #        slice -> cannot apply coi corr because of too much noise
 #        ... get coi-factor from every smoothed slice?
 # get spatial profile (cts/s/pixel, after zoom)
+
 def check_donut(obsid,ext):
     #donut = fits.open('/Users/zexixing/Research/swift46P/data/donuts/mod8_uvv.fits')
     #data = donut[1].data
@@ -216,7 +217,7 @@ def donut_rw(obsid, filt):
         data = zoomImg(data,'smaller')
     if evt_path.exists() and int(epoch)<17:
         pass
-    else:
+    else: # Jan: only write for images instead of events
         data_path = get_path(obs_path+'image/sw'+obsid+filt+'_rw.img.gz')
         hdul = fits.open(data_path)
         n = len(hdul)
@@ -403,7 +404,7 @@ def fit_outer(epoch, obsid, ext, drop_min, drop_max_num, ifdonut=True, method='l
         plt.show()
     return r_pixel, crppixel_coi, drop_min, drop_max, crppixel_coi_model, popt
 
-fit_outer('26', '00094463002', 1, drop_min=False, drop_max_num=50, ifdonut=False, method='log')
+#fit_outer('26', '00094463002', 1, drop_min=False, drop_max_num=50, ifdonut=False, method='log')
 #fit_outer('26', '00094464001', 1, drop_min=False, drop_max_num=20)
 # use the fitted results to get coi-factor for inner part
 

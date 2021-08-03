@@ -23,14 +23,14 @@ def load_img(img_name,relative_path='', ext=0):
             dic_data[ext[i]] = fits_file[i].data
         return dic_data
 
-def load_header(img_name,relative_path=''):
+def load_header(img_name,relative_path='',ext=0):
     '''
     load fits header
     inputs: str
     return: dictionary
     '''
     img_path = get_path('../docs/'+relative_path+img_name)
-    img_header = fits.open(img_path)[0].header #~~TODO:
+    img_header = fits.open(img_path)[ext].header #~~TODO:
     return img_header
 
 def get_dist(point_1, point_2):
@@ -228,7 +228,8 @@ plt.show()
 
 # new modify
 def phot_ct(img_name, center, src_r, start=0, step = 2, shape='total',
-            method='mean', mask_img=False, relative_path='',ext=0,chatter=0,coicorr=False):
+            method='mean', mask_img=False, relative_path='',ext=0,chatter=0,
+            coicorr=False, exposure=False, type='docs', scale=0.502):
     # aper list
     step_num = math.ceil((src_r-start)/step)
     aper_list = np.linspace(start,step*step_num,step_num+1)
@@ -248,7 +249,11 @@ def phot_ct(img_name, center, src_r, start=0, step = 2, shape='total',
         else:
             exp_data = np.ones(img_data.shape)
     if coicorr:
-        coicorr = coincidenceCorr(img_data/exp_data, 0.502)
+        if type == 'docs':
+            coicorr = coincidenceCorr(img_data/exp_data, scale)
+        elif type == 'data':
+            exp_data = exposure
+            coicorr = coincidenceCorr(img_data/exposure, scale)
         img_data = img_data*coicorr
     if isinstance(mask_img, bool):
         if mask_img == False:
@@ -363,11 +368,15 @@ def load_reg_list(reg_name,relative_path=''):
             radiu_list.append([float(k) for k in reg_data[2:]])
     return center_i_list, center_j_list, radiu_list
 
-def reg2bg_bri(img_name, bg_method, bg_center, bg_r, count_method, mask_img = False, relative_path='', ext=0):
+def reg2bg_bri(img_name, bg_method, bg_center, bg_r, count_method, 
+               mask_img = False, relative_path='', ext=0,
+               coicorr=False, exposure=False, type='docs', scale=0.502):
     if bg_method == 'single':
-        result = phot_ct(img_name, bg_center, bg_r, method=count_method, mask_img=mask_img, relative_path=relative_path, ext=ext)
+        result = phot_ct(img_name, bg_center, bg_r, method=count_method, mask_img=mask_img, relative_path=relative_path, ext=ext, 
+                         coicorr=coicorr, exposure=exposure, type=type, scale=scale)
     elif bg_method == 'donut':
-        result = phot_ct(img_name, bg_center, bg_r[1], start=bg_r[0], method=count_method, mask_img=mask_img, relative_path=relative_path, ext=ext)
+        result = phot_ct(img_name, bg_center, bg_r[1], start=bg_r[0], method=count_method, mask_img=mask_img, relative_path=relative_path, ext=ext,
+                         coicorr=coicorr, exposure=exposure, type=type, scale=scale)
     elif bg_method == 'multi':
         result = multi_circle_ct(img_name, bg_center, bg_r, count_method, mask_img, relative_path=relative_path, ext=ext)[:2]
         bg_count = np.array(result[0])
@@ -415,7 +424,8 @@ def aper_phot(img_name, filt,
               bg_center, bg_r,
               src_method, bg_method,
               step=5, mask_img = False, 
-              start = False, relative_path='',ext=0):
+              start = False, relative_path='',ext=0, 
+              coicorr=False, image_type='docs', scale=0.502):
     '''
     src_method = 'total_mean' or 'total_median'
                  or 'azim_mean' or 'azim_median'
@@ -426,6 +436,11 @@ def aper_phot(img_name, filt,
     return cr, cr_err, snr, mag, mag_err, bg_cr, bg_cr_err
     '''
     # src photometry: get src_count, src_pixel
+    if filt:
+        exposure = float(load_header(img_name,relative_path,ext=ext)['EXPOSURE'])
+        #exposure = float(load_header(img_name,relative_path)['EXPTIME'])
+    else:
+        exposure = 1.
     src_shape = src_method.split('_')[0]
     src_stat = src_method.split('_')[1]
     result = phot_ct(img_name,
@@ -435,7 +450,8 @@ def aper_phot(img_name, filt,
                      method = src_stat, 
                      mask_img = mask_img, 
                      relative_path = relative_path,
-                     ext = ext,chatter=1)
+                     ext = ext,chatter=1, 
+                     coicorr=coicorr, exposure=exposure, type=image_type, scale=scale)
     src_count = result[0]
     src_pixel_unmask = result[1]
     src_pixel_mask = result[2]
@@ -448,15 +464,11 @@ def aper_phot(img_name, filt,
                                     bg_center, bg_r, 
                                     bg_stat, mask_img = mask_img, 
                                     relative_path=relative_path,
-                                    ext=ext)
-    if filt:
-        exposure = float(load_header(img_name,relative_path)['EXPTIME'])
-    else:
-        exposure = 1.
-    if filt == 'v':
-        bg_bri = 0.0048569324053546305*0.25*exposure
-        bg_bri_err = bg_bri
-    #print('bg_bri:'+str(bg_bri))
+                                    ext=ext,coicorr=coicorr,exposure=exposure,
+                                    type=image_type,scale=scale)
+    #if filt == 'v':
+    #    bg_bri = 0.0048569324053546305*0.25*exposure
+    #    bg_bri_err = bg_bri
     # photometry
     cr, cr_err, snr = aper_phot_cr(src_count, src_pixel_unmask,
                                    bg_bri, exposure,
@@ -468,5 +480,26 @@ def aper_phot(img_name, filt,
         mag_err = float('NaN')
     bg_cr = bg_bri/exposure
     bg_cr_err = bg_bri_err/exposure
+    print(src_count, src_pixel_unmask, exposure, bg_bri)
     return (cr, cr_err), snr, (mag, mag_err), (bg_cr, bg_cr_err)
 
+
+img_name_v = 'sw00094463002uvv_sk.img.gz'
+src_center = (705, 669)
+src_r_v = 100
+bg_center = (1300,800)
+bg_r = 20
+src_method = 'total_mean'
+mask_img = False
+ext = 1
+result_v = aper_phot(img_name_v, 'v', 
+                     src_center, src_r_v,
+                     bg_center, bg_r,
+                     src_method, 'single_mean',
+                     2., mask_img, 0., 'test/',ext,
+                     True, 'data', 1.004)
+print(result_v)
+# cr, cr_err = (2249.4356597170454, 10.014587197436368)
+# snr = 224.61591430277605, 
+# mag, mag_err = (9.509816060957602, 0.013869574516560306), 
+# bg_cr, bg_cr_err = (0.021394049859810395, 0.0002942053519062586)
